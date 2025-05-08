@@ -4,6 +4,7 @@ use App\Http\Controllers\API\ClienteController;
 use App\Http\Controllers\API\MateriaPrimaController;
 use App\Http\Controllers\API\PedidoController;
 use App\Http\Controllers\API\ProdutoController;
+use App\Http\Controllers\API\ImageProxyController;
 use Illuminate\Support\Facades\Route;
 
 header('Access-Control-Allow-Origin: http://10.10.10.146:5173');
@@ -32,4 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('pedidos', PedidoController::class)->except(['update', 'destroy']);
     Route::patch('pedidos/{pedido}/status', [PedidoController::class, 'atualizarStatus']);
     Route::get('pedidos/{pedido}/documento', [PedidoController::class, 'getDocumento']);
+
+    // Proxy Imagem jsPDF
+    Route::get('/proxy-image', [ImageProxyController::class, 'fetch']);
 });
