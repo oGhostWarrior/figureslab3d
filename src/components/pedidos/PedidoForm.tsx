@@ -5,6 +5,7 @@ import Input from '../Input';
 import { Cliente, Produto } from '../../types';
 import { getSellerOptions } from '../../config/sellers';
 import { formatCurrency } from '../../utils/formatters';
+import ProductCarousel from './ProductCarousel';
 
 interface FormData {
   clienteId: string;
@@ -56,6 +57,11 @@ const PedidoForm: React.FC<PedidoFormProps> = ({
       return total + (produto?.preco || 0) * item.quantidade;
     }, 0);
   };
+
+  const selectedQuantities = formData.itens.reduce((acc, item) => {
+    acc[item.produtoId] = item.quantidade;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
@@ -135,30 +141,14 @@ const PedidoForm: React.FC<PedidoFormProps> = ({
           </div>
         </div>
 
-        {/* Produtos */}
+        {/* Produtos Carousel */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Produtos</h3>
-          <div className="space-y-4">
-            {produtos.map(produto => (
-              <div key={produto.id} className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <p className="font-medium">{produto.nome}</p>
-                  <p className="text-sm text-gray-500">
-                    Estoque: {produto.estoque} | Preço: {formatCurrency(produto.preco)}
-                  </p>
-                </div>
-                <Input
-                  label=""
-                  type="number"
-                  min="0"
-                  max={produto.estoque}
-                  value={formData.itens.find(item => item.produtoId === produto.id)?.quantidade || 0}
-                  onChange={(e) => handleQuantityChange(produto.id, parseInt(e.target.value) || 0)}
-                  className="w-24"
-                />
-              </div>
-            ))}
-          </div>
+          <ProductCarousel
+            produtos={produtos}
+            selectedQuantities={selectedQuantities}
+            onQuantityChange={handleQuantityChange}
+          />
           {errors.itens && (
             <p className="mt-1 text-sm text-red-600">{errors.itens}</p>
           )}
