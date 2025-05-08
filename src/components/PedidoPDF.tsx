@@ -13,62 +13,148 @@ interface PedidoPDFProps {
 }
 
 const PedidoPDF: React.FC<PedidoPDFProps> = ({ pedido, cliente, produtos, onClose }) => {
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
     const margin = 20;
     let yPos = margin;
 
-    doc.setFontSize(20);
-    doc.text('Pedido #' + pedido.id, margin, yPos);
-    yPos += 10;
+    // Header with logo and company info
+    doc.setFillColor(79, 70, 229); // Indigo color
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FiguresLab3D', margin, 28);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Pedido #' + pedido.id, pageWidth - margin, 28, { align: 'right' });
 
-    // Informações do Cliente
-    doc.setFontSize(12);
-    yPos += 10;
-    doc.text('Cliente:', margin, yPos);
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    yPos = 60;
+
+    // Customer information box
+    doc.setFillColor(249, 250, 251);
+    doc.rect(margin - 5, yPos - 5, pageWidth - 2 * margin + 10, 45, 'F');
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Informações do Cliente', margin, yPos);
     yPos += 7;
-    doc.text(`Nome: ${cliente.nome}`, margin + 5, yPos);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Nome: ${cliente.nome}`, margin + 5, yPos + 7);
+    doc.text(`Email: ${cliente.email}`, margin + 5, yPos + 14);
+    doc.text(`Telefone: ${cliente.telefone}`, margin + 5, yPos + 21);
+    doc.text(`Endereço: ${cliente.endereco}`, margin + 5, yPos + 28);
+    
+    yPos += 55;
+
+    // Order details
+    doc.setFillColor(249, 250, 251);
+    doc.rect(margin - 5, yPos - 5, pageWidth - 2 * margin + 10, 30, 'F');
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Detalhes do Pedido', margin, yPos);
     yPos += 7;
-    doc.text(`Email: ${cliente.email}`, margin + 5, yPos);
-    yPos += 7;
-    doc.text(`Telefone: ${cliente.telefone}`, margin + 5, yPos);
-    yPos += 7;
-    doc.text(`Endereço: ${cliente.endereco}`, margin + 5, yPos);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Status: ${pedido.status.replace('_', ' ')}`, margin + 5, yPos + 7);
+    doc.text(`Data: ${new Date(pedido.dataCriacao).toLocaleDateString()}`, margin + 5, yPos + 14);
+    if (pedido.origem) {
+      doc.text(`Origem: ${pedido.origem}`, pageWidth - margin - 50, yPos + 7);
+    }
+    
+    yPos += 40;
+
+    // Products
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Produtos', margin, yPos);
     yPos += 15;
 
-    // Status, Data e Origem
-    doc.text(`Status: ${pedido.status.replace('_', ' ')}`, margin, yPos);
-    yPos += 7;
-    doc.text(`Data: ${new Date(pedido.dataCriacao).toLocaleDateString()}`, margin, yPos);
-    yPos += 7;
-    if (pedido.origem) {
-      doc.text(`Origem: ${pedido.origem}`, margin, yPos);
-      yPos += 7;
-    }
-    yPos += 8;
-
-    // Itens do Pedido
-    doc.text('Itens do Pedido:', margin, yPos);
-    yPos += 10;
-
     let total = 0;
-    pedido.itens.forEach(item => {
+    for (const item of pedido.itens) {
       const produto = produtos.find(p => p.id === item.produtoId);
-      if (produto) {
-        const subtotal = item.quantidade * item.precoUnitario;
-        total += subtotal;
-        
-        doc.text(`${produto.nome}`, margin + 5, yPos);
-        doc.text(`${item.quantidade}x`, margin + 80, yPos);
-        doc.text(`${formatCurrency(item.precoUnitario)}`, margin + 110, yPos);
-        doc.text(`${formatCurrency(subtotal)}`, margin + 150, yPos);
-        yPos += 7;
-      }
-    });
+      if (!produto) continue;
 
-    yPos += 10;
+      const subtotal = item.quantidade * item.precoUnitario;
+      total += subtotal;
+
+      // Product box with image
+      doc.setFillColor(249, 250, 251);
+      doc.rect(margin - 5, yPos - 5, pageWidth - 2 * margin + 10, 50, 'F');
+
+      // Load and draw product image
+      try {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = `https://BackendHere/api/v1/proxy-image?url=${encodeURIComponent(produto.foto)}`;
+        });
+        doc.addImage(img, 'JPEG', margin, yPos, 40, 40, undefined, 'FAST');
+      } catch (error) {
+        console.error('Error loading product image:', error);
+      }
+
+      // Product details
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(produto.nome, margin + 50, yPos + 10);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Quantidade: ${item.quantidade}`, margin + 50, yPos + 20);
+      doc.text(`Preço unitário: ${formatCurrency(item.precoUnitario)}`, margin + 50, yPos + 30);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.text(
+        `Subtotal: ${formatCurrency(subtotal)}`,
+        pageWidth - margin,
+        yPos + 20,
+        { align: 'right' }
+      );
+
+      yPos += 60;
+
+      // Add new page if needed
+      if (yPos > doc.internal.pageSize.height - 60) {
+        doc.addPage();
+        yPos = margin;
+      }
+    }
+
+    // Total
+    doc.setFillColor(79, 70, 229);
+    doc.rect(pageWidth - 100, yPos, 80, 30, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Total: ${formatCurrency(total)}`, margin, yPos);
+    doc.text('Total:', pageWidth - 90, yPos + 12);
+    doc.text(formatCurrency(total), pageWidth - 20, yPos + 12, { align: 'right' });
+
+    // Footer
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.text(
+        `Página ${i} de ${pageCount}`,
+        pageWidth / 2,
+        doc.internal.pageSize.height - 10,
+        { align: 'center' }
+      );
+    }
 
     doc.save(`pedido-${pedido.id}.pdf`);
   };
@@ -100,43 +186,38 @@ const PedidoPDF: React.FC<PedidoPDFProps> = ({ pedido, cliente, produtos, onClos
 
         <div className="mb-6">
           <h3 className="font-semibold mb-2">Itens</h3>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="text-left">Produto</th>
-                <th className="text-right">Qtd</th>
-                <th className="text-right">Preço Unit.</th>
-                <th className="text-right">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedido.itens.map((item, index) => {
-                const produto = produtos.find(p => p.id === item.produtoId);
-                const subtotal = item.quantidade * item.precoUnitario;
-                return (
-                  <tr key={index}>
-                    <td>{produto?.nome}</td>
-                    <td className="text-right">{item.quantidade}</td>
-                    <td className="text-right">{formatCurrency(item.precoUnitario)}</td>
-                    <td className="text-right">{formatCurrency(subtotal)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={3} className="text-right font-bold">Total:</td>
-                <td className="text-right font-bold">
-                  {formatCurrency(
-                    pedido.itens.reduce((sum, item) => sum + (item.quantidade * item.precoUnitario), 0)
-                  )}
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+          <div className="space-y-4">
+            {pedido.itens.map((item, index) => {
+              const produto = produtos.find(p => p.id === item.produtoId);
+              const subtotal = item.quantidade * item.precoUnitario;
+              return produto ? (
+                <div key={index} className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
+                  <img
+                    src={produto.foto}
+                    alt={produto.nome}
+                    className="w-20 h-20 object-cover rounded"
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-medium">{produto.nome}</h4>
+                    <p className="text-sm text-gray-600">
+                      Quantidade: {item.quantidade} x {formatCurrency(item.precoUnitario)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">{formatCurrency(subtotal)}</p>
+                  </div>
+                </div>
+              ) : null;
+            })}
+          </div>
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center">
+          <p className="text-xl font-bold">
+            Total: {formatCurrency(
+              pedido.itens.reduce((sum, item) => sum + (item.quantidade * item.precoUnitario), 0)
+            )}
+          </p>
           <Button 
             onClick={generatePDF}
             icon={Printer}
