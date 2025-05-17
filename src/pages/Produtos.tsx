@@ -14,6 +14,8 @@ interface FormData {
   preco: number;
   estoque: number;
   foto: string;
+  descricao: string;
+  fotos: string[];
   materiaPrima: {
     id: string;
     quantidade: number;
@@ -25,6 +27,8 @@ const initialFormData: FormData = {
   preco: 0,
   estoque: 0,
   foto: '',
+  descricao: '',
+  fotos: [],
   materiaPrima: []
 };
 
@@ -47,6 +51,7 @@ const Produtos: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
+  const [imageUrls, setImageUrls] = useState<string[]>(['']);
 
   useEffect(() => {
     fetchProdutos();
@@ -65,7 +70,7 @@ const Produtos: React.FC = () => {
       newErrors.estoque = 'Estoque não pode ser negativo';
     }
     if (!formData.foto.trim()) {
-      newErrors.foto = 'URL da foto é obrigatória';
+      newErrors.foto = 'URL da foto principal é obrigatória';
     }
     if (formData.materiaPrima.length === 0) {
       newErrors.materiaPrima = 'Selecione pelo menos uma matéria-prima';
@@ -80,11 +85,17 @@ const Produtos: React.FC = () => {
     
     if (!validateForm()) return;
 
+    const validImageUrls = imageUrls.filter(url => url.trim() !== '');
+    const submitData = {
+      ...formData,
+      fotos: validImageUrls
+    };
+
     try {
       if (editingId) {
-        await editarProduto(editingId, formData);
+        await editarProduto(editingId, submitData);
       } else {
-        await adicionarProduto(formData);
+        await adicionarProduto(submitData);
       }
       resetForm();
     } catch (error) {
@@ -98,8 +109,19 @@ const Produtos: React.FC = () => {
       preco: produto.preco,
       estoque: produto.estoque,
       foto: produto.foto,
+      descricao: produto.descricao || '',
+      fotos: produto.fotos || [],
       materiaPrima: produto.materiaPrima
     });
+
+    const existingFotos = produto.fotos || [];
+    if (existingFotos.length > 0) {
+      setImageUrls([...existingFotos, '']);
+    } else {
+      setImageUrls(['']);
+    }
+
+    //setImageUrls(produto.fotos || ['']);
     setEditingId(produto.id);
     setShowForm(true);
   };
@@ -117,18 +139,28 @@ const Produtos: React.FC = () => {
 
   const resetForm = () => {
     setFormData(initialFormData);
+    setImageUrls(['']);
     setErrors({});
     setEditingId(null);
     setShowForm(false);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     const processedValue = type === 'number' ? Number(value) || 0 : value;
     setFormData(prev => ({ ...prev, [name]: processedValue }));
     if (errors[name as keyof FormData]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleImageUrlChange = (index: number, value: string) => {
+    const newUrls = [...imageUrls];
+    newUrls[index] = value;
+    if (index === imageUrls.length - 1 && value.trim() !== '') {
+      newUrls.push('');
+    }
+    setImageUrls(newUrls);
   };
 
   const handleMateriaPrimaChange = (mpId: string, quantidade: number) => {
@@ -187,13 +219,42 @@ const Produtos: React.FC = () => {
               error={errors.estoque}
             />
             <Input
-              label="URL da Foto"
+              label="URL da Foto Principal"
               name="foto"
               value={formData.foto}
               onChange={handleChange}
               error={errors.foto}
               placeholder="https://exemplo.com/foto.jpg"
             />
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Fotos Adicionais
+              </label>
+              {imageUrls.map((url, index) => (
+                <Input
+                  key={index}
+                  label={`Foto ${index + 1}`}
+                  value={url}
+                  onChange={(e) => handleImageUrlChange(index, e.target.value)}
+                  placeholder="https://exemplo.com/foto.jpg"
+                />
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Descrição
+              </label>
+              <textarea
+                name="descricao"
+                value={formData.descricao}
+                onChange={handleChange}
+                rows={4}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="Descreva o produto..."
+              />
+            </div>
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -250,6 +311,12 @@ const Produtos: React.FC = () => {
               <h3 className="text-lg font-semibold">{produto.nome}</h3>
               <p className="text-gray-600">R$ {produto.preco.toFixed(2)}</p>
               <p className="text-sm text-gray-500">Estoque: {produto.estoque}</p>
+              
+              {produto.descricao && (
+                <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                  {produto.descricao}
+                </p>
+              )}
               
               <div className="mt-4 space-y-1">
                 <p className="text-sm font-medium text-gray-700">Matérias-Primas:</p>
