@@ -23,6 +23,9 @@ class ProdutoController extends Controller
             'preco' => 'required|numeric|min:0',
             'estoque' => 'required|numeric|min:0',
             'foto' => 'required|url',
+            'descricao' => 'nullable|string',
+            'fotos' => 'nullable|array',
+            'fotos.*' => 'url',
             'materiaPrima' => 'required|array',
             'materiaPrima.*.id' => 'required|exists:materia_primas,id',
             'materiaPrima.*.quantidade' => 'required|numeric|min:0'
@@ -35,7 +38,9 @@ class ProdutoController extends Controller
                 'nome' => $validated['nome'],
                 'preco' => $validated['preco'],
                 'estoque' => $validated['estoque'],
-                'foto' => $validated['foto']
+                'foto' => $validated['foto'],
+                'descricao' => $validated['descricao'] ?? null,
+                'fotos' => $validated['fotos'] ?? []
             ]);
 
             foreach ($validated['materiaPrima'] as $mp) {
@@ -65,6 +70,9 @@ class ProdutoController extends Controller
             'preco' => 'required|numeric|min:0',
             'estoque' => 'required|numeric|min:0',
             'foto' => 'required|url',
+            'descricao' => 'nullable|string',
+            'fotos' => 'nullable|array',
+            'fotos.*' => 'url',
             'materiaPrima' => 'required|array',
             'materiaPrima.*.id' => 'required|exists:materia_primas,id',
             'materiaPrima.*.quantidade' => 'required|numeric|min:0'
@@ -77,7 +85,9 @@ class ProdutoController extends Controller
                 'nome' => $validated['nome'],
                 'preco' => $validated['preco'],
                 'estoque' => $validated['estoque'],
-                'foto' => $validated['foto']
+                'foto' => $validated['foto'],
+                'descricao' => $validated['descricao'] ?? null,
+                'fotos' => $validated['fotos'] ?? []
             ]);
 
             $produto->materiasPrimas()->detach();
