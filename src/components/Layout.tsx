@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { Printer, Users, Package, Box, ClipboardList, FileText } from 'lucide-react';
+import { Printer, Users, Package, Box, ClipboardList, FileText, Image } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 const Layout: React.FC = () => {
@@ -23,6 +23,10 @@ const Layout: React.FC = () => {
                 <Link to="/produtos" className="flex items-center space-x-1 hover:text-indigo-200">
                   <Package className="h-4 w-4" />
                   <span>Produtos</span>
+                </Link>
+                <Link to="/portfolio" className="flex items-center space-x-1 hover:text-indigo-200">
+                  <Image className="h-4 w-4" />
+                  <span>Portfólio</span>
                 </Link>
                 <Link to="/materias-primas" className="flex items-center space-x-1 hover:text-indigo-200">
                   <Box className="h-4 w-4" />
