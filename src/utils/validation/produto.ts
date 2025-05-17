@@ -38,6 +38,8 @@ export const validateProdutoResponse = (data: any): boolean => {
     (typeof data.preco === 'number' || typeof data.preco === 'string') &&
     (typeof data.estoque === 'number' || typeof data.estoque === 'string') &&
     typeof data.foto === 'string' &&
-    Array.isArray(data.materias_primas)
+    Array.isArray(data.materias_primas) &&
+    (typeof data.descricao === 'string' || data.descricao === null) &&
+    (Array.isArray(data.fotos))
   );
 };
