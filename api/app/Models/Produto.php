@@ -13,12 +13,15 @@ class Produto extends Model
         'nome',
         'preco',
         'estoque',
-        'foto'
+        'foto',
+        'descricao',
+        'fotos'
     ];
 
     protected $casts = [
         'preco' => 'float',
-        'estoque' => 'integer'
+        'estoque' => 'integer',
+        'fotos' => 'array'
     ];
 
     public function materiasPrimas()
