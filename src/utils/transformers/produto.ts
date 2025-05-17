@@ -7,6 +7,8 @@ interface ProdutoData {
   preco: number | string;
   estoque: number | string;
   foto: string;
+  descricao?: string;
+  fotos?: string[];
   materias_primas: Array<{
     id: number;
     pivot: {
@@ -26,6 +28,8 @@ export const transformProduto = (data: ProdutoData): Produto => {
     preco: Number(data.preco || 0),
     estoque: Number(data.estoque || 0),
     foto: String(data.foto || ''),
+    descricao: String(data.descricao || ''),
+    fotos: Array.isArray(data.fotos) ? data.fotos : [],
     materiaPrima: data.materias_primas?.map(mp => ({
       id: String(mp.id),
       quantidade: Number(mp.pivot.quantidade)
@@ -53,6 +57,8 @@ export const createProdutoPayload = (produto: Omit<Produto, 'id'>) => {
     preco: Number(produto.preco),
     estoque: Number(produto.estoque),
     foto: String(produto.foto).trim(),
+    descricao: produto.descricao,
+    fotos: produto.fotos,
     materiaPrima: produto.materiaPrima.map(mp => ({
       id: mp.id,
       quantidade: Number(mp.quantidade)
