@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import Button from '../Button';
 import { Produto, MateriaPrima } from '../../types';
 import { formatCurrency } from '../../utils/formatters';
+import ProductCarousel from './ProductCarousel';
 
 interface ProdutoModalProps {
   produto: Produto;
@@ -17,6 +18,9 @@ const ProdutoModal: React.FC<ProdutoModalProps> = ({
   isOpen,
   onClose
 }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const images = [produto.foto, ...(produto.fotos || [])];
+
   if (!isOpen) return null;
 
   const custoProducao = produto.materiaPrima.reduce((total, mp) => {
@@ -27,6 +31,14 @@ const ProdutoModal: React.FC<ProdutoModalProps> = ({
 
   const lucroPorUnidade = produto.preco - custoProducao;
   const margemLucro = (lucroPorUnidade / produto.preco) * 100;
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const handlePreviousImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -44,17 +56,23 @@ const ProdutoModal: React.FC<ProdutoModalProps> = ({
 
         <div className="flex-1 overflow-y-auto">
           <div className="grid md:grid-cols-2 gap-6 p-6">
-            {/* Imagem do Produto */}
-            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-              <img
-                src={produto.foto}
-                alt={produto.nome}
-                className="w-full h-full object-cover"
+            <div className="space-y-4">
+              <ProductCarousel
+                images={images}
+                currentIndex={currentImageIndex}
+                onNext={handleNextImage}
+                onPrevious={handlePreviousImage}
               />
             </div>
 
             <div className="space-y-6">
-              {/* Resumo Financeiro */}
+              {produto.descricao && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">Descrição</h3>
+                  <p className="text-gray-600">{produto.descricao}</p>
+                </div>
+              )}
+
               <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                 <h3 className="font-semibold text-lg">Resumo Financeiro</h3>
                 <div className="grid grid-cols-2 gap-4">
@@ -77,7 +95,6 @@ const ProdutoModal: React.FC<ProdutoModalProps> = ({
                 </div>
               </div>
 
-              {/* Matérias-Primas */}
               <div>
                 <h3 className="font-semibold text-lg mb-3">Matérias-Primas Utilizadas</h3>
                 <div className="space-y-2">
@@ -107,7 +124,6 @@ const ProdutoModal: React.FC<ProdutoModalProps> = ({
                 </div>
               </div>
 
-              {/* Estoque */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-semibold text-lg mb-2">Situação do Estoque</h3>
                 <div className="flex justify-between items-center">
