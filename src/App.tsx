@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
 import Produtos from './pages/Produtos';
+import Portfolio from './pages/Portfolio';
 import MateriasPrimas from './pages/MateriasPrimas';
 import Pedidos from './pages/Pedidos';
 import Relatorios from './pages/Relatorios';
@@ -28,6 +29,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="clientes" element={<Clientes />} />
             <Route path="produtos" element={<Produtos />} />
+            <Route path="portfolio" element={<Portfolio />} />
             <Route path="materias-primas" element={<MateriasPrimas />} />
             <Route path="pedidos" element={<Pedidos />} />
             <Route path="relatorios" element={<Relatorios />} />
