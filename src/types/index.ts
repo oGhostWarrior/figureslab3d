@@ -22,6 +22,8 @@ export interface Produto {
   preco: number;
   estoque: number;
   foto: string;
+  fotos?: string[];
+  descricao?: string;
   materiaPrima: {
     id: string;
     quantidade: number;
