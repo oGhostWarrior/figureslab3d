@@ -1,50 +1,64 @@
-# React + TypeScript + Vite
+## 🚀 Funcionalidades Principais
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+  * **Dashboard**: Uma visão geral intuitiva com métricas e indicadores-chave do negócio.
+  * **Clientes**: Gerenciamento completo de informações de clientes, incluindo dados de contato.
+  * **Matérias-Primas**: Controle de estoque de insumos (filamentos), com rastreamento de quantidade e custo.
+  * **Produtos**: Cadastro detalhado de produtos, com informações de preço, custo, estoque e associação com as matérias-primas necessárias.
+  * **Pedidos**: Módulo central para criar, rastrear e gerenciar o status dos pedidos.
+  * **Relatórios**: Geração de relatórios financeiros e de vendas em formato PDF para análise gerencial.
 
-Currently, two official plugins are available:
+## 💻 Tecnologias Utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Este projeto foi construído com uma arquitetura **full-stack**, dividida em duas partes:
 
-## Expanding the ESLint configuration
+### Backend
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+  * **Laravel**: Framework PHP robusto para a lógica de negócios e persistência de dados.
+  * **Laravel Sanctum**: Utilizado para a autenticação segura da API.
+  * **MySQL/PostgreSQL**: Sistema de gerenciamento de banco de dados para armazenamento das informações.
 
-- Configure the top-level `parserOptions` property like this:
+### Frontend
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+  * **React**: Biblioteca JavaScript para a construção da interface de usuário.
+  * **TypeScript**: Adiciona tipagem estática, garantindo maior segurança e facilidade na manutenção do código.
+  * **Vite**: Ferramenta de build extremamente rápida para um ambiente de desenvolvimento ágil.
+  * **Tailwind CSS**: Framework CSS utilitário para estilização rápida e responsiva.
+  * **Zustand**: Biblioteca para gerenciamento de estado global, tornando a aplicação mais escalável.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+## ⚙️ Como Iniciar
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+Siga as instruções abaixo para configurar e executar o projeto em seu ambiente de desenvolvimento.
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+### Backend (API)
+
+1.  Acesse a pasta `api/` no terminal.
+2.  Instale as dependências com o Composer:
+    ```bash
+    composer install
+    ```
+3.  Copie o arquivo de configuração de ambiente e defina suas credenciais de banco de dados:
+    ```bash
+    cp .env.example .env
+    ```
+4.  Execute as migrações para criar as tabelas no banco de dados:
+    ```bash
+    php artisan migrate
+    ```
+5.  Inicie o servidor local:
+    ```bash
+    php artisan serve
+    ```
+
+### Frontend (Aplicação React)
+
+1.  Em outro terminal, acesse a pasta `src/`.
+2.  Instale as dependências do Node.js:
+    ```bash
+    npm install
+    ```
+3.  Inicie o servidor de desenvolvimento:
+    ```bash
+    npm run dev
+    ```
+
+O frontend estará disponível em `http://localhost:5173` e se comunicará com o backend iniciado na porta padrão do Laravel.
